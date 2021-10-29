@@ -1,0 +1,17 @@
+name: 'Updates img.shields.io with the test coverage'
+description: 'Updates img.shields.io with the test coverage and updates the repository'
+author: 'Mahesh Rayas'
+inputs:
+  token:
+    description: 'GITHUB_TOKEN.'
+  user:
+    description: 'pass github repository'
+  email:
+    description: 'frequency of scan (must match the cron scheduler)'
+
+runs:
+  using: 'docker'
+  image: 'docker.io/maheshrayas/cover:1.0'
+branding:
+  icon: 'zoom-in'
+  color: 'purple'
