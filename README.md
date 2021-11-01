@@ -17,18 +17,63 @@ Img shields can display coverage badge when you pass the percentage in the url (
 This GHA will be triggered whenever a change is pushed to default branch. It reads the cover.json, updates the coverage % in the README.md, create a PR to default branch and automerges.
 
 
-## Configuration in GHA workflow
+## Configuration in GHA workflow for Go Coverage
 
 Refer to the example on how to setup the github action
 https://github.com/maheshrayas/go-badger-test
 
+### Makefile
+
 ```bash
-      - name: coverage badge
+.PHONY: dependencies
+## Install dependencies
+dependencies:
+	go get -u github.com/jstemmer/go-junit-report \
+	&& go get github.com/axw/gocov/gocov \
+
+build: dependencies
+	go build ./...
+
+test: build
+	rm -rf cover.* cover
+	mkdir -p cover
+	go test ./... -v -coverprofile ./cover.out
+	gocov convert cover.out > cover.json
+```
+
+
+
+```bash
+name: updated pr
+on:
+  pull_request:
+  push:
+    branches:
+      - master
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/setup-go@v2.1.3
+        with:
+          go-version: 1.16.7
+      - name: Checkout
+        uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+      - name: Run tests
+        id: test
+        env:
+          GITHUB_TOKEN: '${{ secrets.GITHUB_TOKEN }}'
+        run: |
+          make test
+      - name: release-notifier
         uses: maheshrayas/action-coverage-badge@v1
         with:
           token: '${{ secrets.GITHUB_TOKEN }}'
-          user: <github_username>
-          email: <github_email>
+          user: <gh_user>
+          email: <gh_email>
 ```
 
 ## Supported Languages
