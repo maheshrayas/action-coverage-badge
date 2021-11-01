@@ -1,0 +1,29 @@
+name: lint
+
+on:
+  pull_request:
+    branches:
+      - main
+    paths:
+      - 'src/**'
+  push:
+    branches:
+      - main
+  workflow_dispatch: null
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions-rs/toolchain@v1
+        with:
+          toolchain: stable
+      - name: build
+        uses: actions-rs/cargo@v1
+        with:
+          command: build
+      - name: lint
+        uses: actions-rs/clippy-check@v1
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}

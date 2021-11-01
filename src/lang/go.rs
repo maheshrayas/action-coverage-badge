@@ -20,18 +20,14 @@ struct Functions {
 }
 #[derive(Deserialize, Debug)]
 struct Statements {
-    #[serde(rename = "Start")]
-    start: i16,
-    #[serde(rename = "End")]
-    end: i16,
     #[serde(rename = "Reached")]
     reached: i16,
 }
+
 pub fn read_cov_report() -> Result<f64> {
     let contents = fs::read_to_string("cover.json").expect("Something went wrong reading the file");
-
     let go_report: GoReport = serde_json::from_str(contents.as_str())
-        .with_context(|| format!("failed to read the cover.json"))?;
+        .with_context(|| "failed to read the cover.json".to_string())?;
     let mut no_of_statments = 0.0;
     let mut no_of_covered = 0.0;
     for p in go_report.packages {
