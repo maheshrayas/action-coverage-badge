@@ -11,7 +11,7 @@ inputs:
 
 runs:
   using: 'docker'
-  image: 'docker://maheshrayas/cover:1.0'
+  image: 'docker://maheshrayas/coverage-badger:1.0'
 branding:
   icon: 'zoom-in'
   color: 'purple'
