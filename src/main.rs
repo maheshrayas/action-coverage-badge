@@ -23,6 +23,7 @@ fn main() -> Result<()> {
     let user = env::var("INPUT_USER").expect("Missing input parameter: USER");
     let email = env::var("INPUT_EMAIL").expect("Missing input parameter: EMAIL");
     let branch=  env::var("GITHUB_HEAD_REF").expect("Missing input parameter: EMAIL");
+    let pr_sha =  env::var("GITHUB_SHA").unwrap();
 
     let proxy = match env::var("HTTP_PROXY") {
         Ok(proxy) => proxy,
@@ -32,7 +33,7 @@ fn main() -> Result<()> {
 
     // set environment variable for gh
     env::set_var("GITHUB_TOKEN", &token);
-    let git = Git::new(&branch, &user, &token, &email, &proxy);
+    let git = Git::new(&branch, &user, &token, &email, &proxy,&pr_sha);
     // git.git_branch()?;
     // info!("Currently on branch {}", BRANCH);
     let percent = read_cov_report()?;
@@ -42,7 +43,7 @@ fn main() -> Result<()> {
     // commit the code
     git.commit_push()?;
     // creat pr
-    //gh::create_pr()?;
+    // gh::create_pr()?;
     // // approve pr
     // gh::approve_pr()?;
     // // merge the pr

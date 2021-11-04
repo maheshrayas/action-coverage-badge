@@ -18,6 +18,7 @@ pub(crate) struct Git<'a> {
     pub(crate) http_pass: &'a str,
     pub(crate) git_email: &'a str,
     pub(crate) proxy: &'a str,
+    pub(crate) pr_sha: &'a str,
 }
 
 pub(crate) fn get_color<'a>(percentage: f64) -> &'a str {
@@ -39,6 +40,7 @@ impl<'a> Git<'a> {
         http_pass: &'a str,
         git_email: &'a str,
         proxy: &'a str,
+        pr_sha:&'a str,
     ) -> Self {
         Git {
             branch,
@@ -46,6 +48,7 @@ impl<'a> Git<'a> {
             http_pass,
             git_email,
             proxy,
+            pr_sha,
         }
     }
 
@@ -104,25 +107,25 @@ impl<'a> Git<'a> {
             &tree,
             &[&parent_commit],
         )?;
-        // let mut remote = repo.find_remote("origin")?;
-        // let mut p = ProxyOptions::new();
-        // if self.proxy != "" {
-        //     p.url(&self.proxy);
-        // }
+        let mut remote = repo.find_remote("origin")?;
+        let mut p = ProxyOptions::new();
+        if self.proxy != "" {
+            p.url(&self.proxy);
+        }
 
-        // remote.connect_auth(Direction::Push, Some(self.create_callbacks()), None)?;
-        // let mut push_options = PushOptions::default();
-        // push_options.remote_callbacks(self.create_callbacks());
+        remote.connect_auth(Direction::Push, Some(self.create_callbacks()), Some(p))?;
+        let mut push_options = PushOptions::default();
+        push_options.remote_callbacks(self.create_callbacks());
 
-        // let ref_specs = format!("refs/heads/{}", self.branch);
+        let ref_specs = format!("refs/heads/{}", self.branch);
 
-        // remote.push(
-        //     &[[
-        //         [ref_specs.to_owned(), ref_specs].join(":"),
-        //     ]
-        //     .join("")],
-        //     Some(&mut push_options),
-        // )?;
+        remote.push(
+            &[[
+                [ref_specs.to_owned(), ref_specs].join(":"),
+            ]
+            .join("")],
+            Some(&mut push_options),
+        )?;
 
         Ok(())
     }
