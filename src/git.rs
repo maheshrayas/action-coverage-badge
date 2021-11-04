@@ -94,6 +94,7 @@ impl<'a> Git<'a> {
         let oid = index.write_tree()?;
         let signature = Signature::now(self.http_user, self.git_email)?;
         let parent_commit = Self::find_last_commit(&repo)?;
+        println!("parent commit: {:?}",parent_commit);
         let tree = repo.find_tree(oid)?;
         repo.commit(
             Some("HEAD"),
@@ -103,26 +104,25 @@ impl<'a> Git<'a> {
             &tree,
             &[&parent_commit],
         )?;
-        let mut remote = repo.find_remote("origin")?;
-        let mut p = ProxyOptions::new();
-        if self.proxy != "" {
-            p.url(&self.proxy);
-        }
+        // let mut remote = repo.find_remote("origin")?;
+        // let mut p = ProxyOptions::new();
+        // if self.proxy != "" {
+        //     p.url(&self.proxy);
+        // }
 
-        remote.connect_auth(Direction::Push, Some(self.create_callbacks()), Some(p))?;
-        let mut push_options = PushOptions::default();
-        push_options.remote_callbacks(self.create_callbacks());
+        // remote.connect_auth(Direction::Push, Some(self.create_callbacks()), None)?;
+        // let mut push_options = PushOptions::default();
+        // push_options.remote_callbacks(self.create_callbacks());
 
-        let ref_specs = format!("refs/heads/{}", self.branch);
+        // let ref_specs = format!("refs/heads/{}", self.branch);
 
-        remote.push(
-            &[[
-                String::from("+"),
-                [ref_specs.to_owned(), ref_specs].join(":"),
-            ]
-            .join("")],
-            Some(&mut push_options),
-        )?;
+        // remote.push(
+        //     &[[
+        //         [ref_specs.to_owned(), ref_specs].join(":"),
+        //     ]
+        //     .join("")],
+        //     Some(&mut push_options),
+        // )?;
 
         Ok(())
     }
