@@ -43,6 +43,27 @@ pub(crate) fn create_pr() -> Result<()> {
     Ok(())
 }
 
+
+pub(crate) fn approve_pr() -> Result<()> {
+    let output = Command::new("gh")
+        .arg("pr")
+        .arg("review")
+        .arg("--approve")
+        .output()?;
+    if output.status.success() {
+        info!("Approved PR")
+    } else {
+        return Err(GHError::new(format!(
+            "Failed to approve the PR {:?}",
+            String::from_utf8_lossy(&output.stderr)
+        ))
+        .into());
+    }
+    Ok(())
+}
+
+
+
 pub(crate) fn merge_pr() -> Result<()> {
     let output = Command::new("gh")
         .arg("pr")
@@ -54,7 +75,7 @@ pub(crate) fn merge_pr() -> Result<()> {
         info!("Successfully merged to default branch")
     } else {
         return Err(GHError::new(format!(
-            "Failed to while merging the PR {:?}",
+            "Failed while merging the PR {:?}",
             String::from_utf8_lossy(&output.stderr)
         ))
         .into());

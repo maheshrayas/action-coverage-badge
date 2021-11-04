@@ -3,8 +3,8 @@ use regex::Regex;
 use std::fs;
 
 use git2::{
-    Commit, Cred, Direction, IndexAddOption, ObjectType, PushOptions, RemoteCallbacks, Repository,
-    Signature,
+    Commit, Cred, Direction, IndexAddOption, ObjectType, ProxyOptions, PushOptions,
+    RemoteCallbacks, Repository, Signature,
 };
 
 const RED: &str = "red";
@@ -13,10 +13,11 @@ const YELLOW: &str = "yellow";
 const INACTIVE: &str = "inactive";
 
 pub(crate) struct Git<'a> {
-   pub(crate) branch: &'a str,
-   pub(crate) http_user: &'a str,
-   pub(crate) http_pass: &'a str,
-   pub(crate) git_email: &'a str,
+    pub(crate) branch: &'a str,
+    pub(crate) http_user: &'a str,
+    pub(crate) http_pass: &'a str,
+    pub(crate) git_email: &'a str,
+    pub(crate) proxy: &'a str,
 }
 
 pub(crate) fn get_color<'a>(percentage: f64) -> &'a str {
@@ -32,14 +33,21 @@ pub(crate) fn get_color<'a>(percentage: f64) -> &'a str {
 }
 
 impl<'a> Git<'a> {
-   pub(crate) fn new(branch: &'a str, http_user:&'a str, http_pass:&'a str,git_email:&'a str) -> Self {
-        Git{
-        branch,
-        http_user,
-        http_pass,
-        git_email,
-       }
-   }
+    pub(crate) fn new(
+        branch: &'a str,
+        http_user: &'a str,
+        http_pass: &'a str,
+        git_email: &'a str,
+        proxy: &'a str,
+    ) -> Self {
+        Git {
+            branch,
+            http_user,
+            http_pass,
+            git_email,
+            proxy,
+        }
+    }
 
     pub(crate) fn git_branch(&self) -> Result<()> {
         let repo = Repository::open(".")
@@ -77,8 +85,7 @@ impl<'a> Git<'a> {
         Ok(())
     }
 
-    pub(crate) fn commit_push(&self
-    ) -> Result<()> {
+    pub(crate) fn commit_push(&self) -> Result<()> {
         let repo = Repository::open(".")
             .with_context(|| "Something went wrong while setting up repository".to_string())?;
         let mut index = repo.index()?;
@@ -97,12 +104,12 @@ impl<'a> Git<'a> {
             &[&parent_commit],
         )?;
         let mut remote = repo.find_remote("origin")?;
+        let mut p = ProxyOptions::new();
+        if self.proxy != "" {
+            p.url(&self.proxy);
+        }
 
-        remote.connect_auth(
-            Direction::Push,
-            Some(self.create_callbacks()),
-            None,
-        )?;
+        remote.connect_auth(Direction::Push, Some(self.create_callbacks()), Some(p))?;
         let mut push_options = PushOptions::default();
         push_options.remote_callbacks(self.create_callbacks());
 
@@ -128,7 +135,8 @@ impl<'a> Git<'a> {
 
     fn create_callbacks(&self) -> RemoteCallbacks {
         let mut callbacks = RemoteCallbacks::new();
-        callbacks.credentials(move |_, _, _| Cred::userpass_plaintext(self.http_user, self.http_pass));
+        callbacks
+            .credentials(move |_, _, _| Cred::userpass_plaintext(self.http_user, self.http_pass));
         callbacks
     }
 }
