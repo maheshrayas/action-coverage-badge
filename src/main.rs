@@ -41,7 +41,7 @@ fn main() -> Result<()> {
     // update the readme
     Git::<'_>::update_readme(percent, badge_color, "README.md")?;
     // commit the code
-    git.commit_push()?;
+    // git.commit_push()?;
     // creat pr
     // gh::create_pr()?;
     // // approve pr
