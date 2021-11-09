@@ -8,10 +8,13 @@ inputs:
     description: 'github user'
   email:
     description: 'github email'
+  test_on:
+    description: 'update coverage on main branch or on pull request'
+    default: 'default' # on pr request, input -> pr
 
 runs:
   using: 'docker'
-  image: 'docker://maheshrayas/coverage-badger:1.0'
+  image: 'docker://maheshrayas/coverage-badger:2.0'
 branding:
   icon: 'zoom-in'
   color: 'purple'
